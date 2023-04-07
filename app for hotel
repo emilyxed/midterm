@@ -1,0 +1,116 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using WebApi.Models;
+
+
+public class Room
+{
+    public string Id {get; set;}
+    public int Number {get; set;}
+    public int Floor {get; set;}
+    public string Type {get; set;}
+    public int BedNumber {get; set;}
+    public bool Smoking {get; set;}
+    public bool Availability {get; set;}
+}
+
+public class Guest
+{
+    public string Id {get; set;}
+    public string FirstName {get; set;}
+    public string LastName {get; set;}
+    public DateTime DOB {get; set;}
+    public string Nationality {get; set;}
+    public string Country {get; set;}
+    public string City {get; set;}
+    public string PassportNumber {get; set;}
+    public DateTime CheckIn {get; set;}
+    public DateTime CheckOut {get; set;}
+    public int RoomNumber {get; set;}
+}
+
+namespace WebApi.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class RoomController : ControllerBase
+    {
+        private readonly List<Room> _rooms;
+
+        public RoomController()
+        {
+            _rooms = new List<Room>();
+        }
+        
+        [HttpGet]
+        public IActionResult GetRooms()
+        {
+            return Ok(_rooms);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetRoom(string id)
+        {
+            var room = _rooms.FirstOrDefault(r => r.Id == id);
+
+            if (room == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(room);
+        }
+
+        [HttpPost]
+        public IActionResult CreateRoom(Room room)
+        {
+            if (_rooms.Any(r => r.Id == room.Id))
+            {
+                return Conflict("Room already exists");
+            }
+
+            _rooms.Add(room);
+
+            return CreatedAtAction(nameof(GetRoom), new { id = room.Id }, room);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdateRoom(string id, Room room)
+        {
+            var existingRoom = _rooms.FirstOrDefault(r => r.Id == id);
+
+            if (existingRoom == null)
+            {
+                return NotFound();
+            }
+
+            existingRoom.Number = room.Number;
+            existingRoom.Floor = room.Floor;
+            existingRoom.Type = room.Type;
+            existingRoom.BedNumber = room.BedNumber;
+            existingRoom.Smoking = room.Smoking;
+            existingRoom.Availability = room.Availability;
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteRoom(string id)
+        {
+            var room = _rooms.FirstOrDefault(r => r.Id == id);
+
+            if (room == null)
+            {
+                return NotFound();
+            }
+
+            _rooms.Remove(room);
+
+            return NoContent();
+        }
+    }
+}
+
+
